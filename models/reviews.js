@@ -1,12 +1,12 @@
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
-var ReviewsSchema = new Schema({
-    name : String,
-    rating : Number,
-    message : String
-})
-
-module.exports = {
-    "reviews" : mongoose.model('reviews', ReviewsSchema)
-}
+const ReviewSchema = new Schema({
+    name: String,
+    rating: Number,
+    message: String,
+  });
+  
+  const Review = mongoose.model('Review', ReviewSchema);
+  
+  module.exports = Review;

@@ -1,23 +1,43 @@
-const orderDB = require('../models/orders').orders
-const {sendOrderConfirmation} = require('../authenticate/sendEmail')
+const orderDB = require("../models/orders").orders;
+const userDB = require('./userDatabaseFunctions')
+const { sendOrderConfirmation } = require("../authenticate/sendEmail");
 
-function saveOrder(data,res){
+async function saveOrder(data, res) {
+
+  const {houseNo,street,postal,city} = data.orderAddress
+  if(data.user.id === '' || houseNo === '' , street === '' ||
+     postal === '' || city === '' || data.userOrder.length===0 || data.totalAmount===0){
+      return res.status(400).json({status:"FAILURE",message:"Order Incomplete.Please select the food items from the menu."})
+     }
+
+  try{
+     
     const order = new orderDB
-    
-    order.customerId = data.id
-    order.address = data.address
+    order.customerId = data.user?.id
+    order.address = data.orderAddress
     order.totalAmount = data.totalAmount
-    order.isCompleted = data.isCompleted
-    order.order = data.order
+    order.isCompleted = true
+    order.order = data.userOrder
+    order.payment = data.payment
 
-    order.save(function(err,result){
-        if(err){
-            console.log(err)
-            return res.json({error:err})
-        }
-        sendOrderConfirmation("grewalharkanwal36@gmail.com",data.order)
-       return res.json({status:"SUCCESS",message:`Order created with id ${result._id}.`})
+    order.save(async function(err,result){
+      if(err){
+         console.log(err)
+         return res.status(500).json({status:"FAILURE",message:err.message})
+      }
+      console.log(result)
+      const userInfo = await userDB.getUser(data.user.id)
+      sendOrderConfirmation(data.user.email,data.userOrder,data.totalAmount)
+      console.log(userInfo)
+      return res.json({status:"SUCCESS",message:`Order created successfully with id ${result._id}.`})
     })
+
+
+  }catch(error){
+     console.log(err)
+     return res.status(500).json({status:"FAILURE",message:err.message})
+  }
+
 }
 
-module.exports = {saveOrder}
+module.exports = { saveOrder };

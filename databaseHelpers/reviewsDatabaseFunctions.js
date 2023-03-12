@@ -1,30 +1,18 @@
-const reviewsDB = require('../models/reviews').reviews
+const reviewsData = require('../models/reviews');
 
-function getReviews(res, result){
-   reviewsDB.find()
-   .lean()
-   .then((result) => {return res.json(result)})
-   .catch((err) => {
-    console.log(err)
-    return res.json({error:err})})
-}
-
-function addReviews(data,res){
-
-    const newReview = new reviewsDB
-    newReview.name = data.name
-    newReview.rating = data.rating
-    newReview.message = data.message
-
-    newReview.save(function(err,result){
-        if(err){
-            console.log(err)
-            return res.json({error:err})
-        }
-
-        return res.json({status:"SUCCESS",message:`Review added successfully.`})
-    })
-    
-}
+// Get reviews
+async function getReviews() {
+    return await reviewsData.find();
+  }
+  
+  // Add new review
+  async function addReviews(review) {
+    const newReview = new reviewsData({
+      name: review.name,
+      rating: review.rating,
+      message: review.message,
+    });
+    return await newReview.save();
+  }
 
 module.exports = {getReviews, addReviews}
